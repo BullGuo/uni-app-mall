@@ -14,6 +14,7 @@ const categoryList = ref<CategoryItem[]>([])
 const hotList = ref<HotItem[]>([])
 const guessRef = ref<ComGuessInstance | null>(null)
 let isRefresher = ref(false)
+let isLoading = ref(false)
 
 async function getBannerData() {
   const res = await getHomeBanner()
@@ -46,16 +47,18 @@ async function handleRefresh() {
   isRefresher.value = false
 }
 
-onLoad(() => {
-  getBannerData()
-  getCategoryData()
-  getHtoData()
+onLoad(async () => {
+  isLoading.value = true
+  await Promise.all([getBannerData(), getCategoryData(), getHtoData()])
+  isLoading.value = false
 })
 </script>
 
 <template>
   <nav-bar />
+  <skeleton v-if="isLoading" />
   <scroll-view
+    v-else
     scroll-y
     refresher-enabled
     :refresher-triggered="isRefresher"
