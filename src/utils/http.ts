@@ -23,18 +23,18 @@ const httpInterceptor = {
 uni.addInterceptor('request', httpInterceptor)
 uni.addInterceptor('uploadFile', httpInterceptor)
 
-interface successResult<T> {
+interface SuccessResult<T> {
   code: string
   msg: string
   result: T
 }
 
 export const http = <T>(option: UniApp.RequestOptions) => {
-  return new Promise<successResult<T>>((resolve, reject) => {
+  return new Promise<SuccessResult<T>>((resolve, reject) => {
     uni.request({
       ...option,
       success(res) {
-        const successData = <successResult<T>>res.data
+        const successData = <SuccessResult<T>>res.data
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(successData)
         } else if (res.statusCode === 401) {
