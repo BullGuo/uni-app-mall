@@ -1,3 +1,5 @@
+import type { GoodsItem } from './global'
+
 export interface BannerItem {
   id: string
   imgUrl: string
@@ -17,28 +19,7 @@ export interface HotItem {
   pictures: string[]
   target: string
   title: string
-  type: string
+  type: number
 }
 
-export interface GuessItem {
-  id: string
-  name: string
-  desc: string
-  price: number
-  picture: string
-  discount: number
-  orderNum: number
-}
-
-export interface PageResult<T> {
-  counts: number
-  pageSize: number
-  pages: number
-  page: number
-  items: T[]
-}
-
-export interface pageParams {
-  page: number
-  pageSize: number
-}
+export type GuessItem = GoodsItem

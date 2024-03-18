@@ -1,11 +1,5 @@
-import type {
-  BannerItem,
-  CategoryItem,
-  HotItem,
-  PageResult,
-  GuessItem,
-  pageParams,
-} from '@/types/home'
+import type { PageResult, pageParams } from '@/types/global'
+import type { BannerItem, CategoryItem, HotItem, GuessItem } from '@/types/home'
 import { http } from '@/utils/http'
 
 /**
