@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getHomeGuess } from '@/services/home'
-import type { GuessItem, pageParams } from '@/types/home'
+import type { pageParams } from '@/types/global'
+import type { GuessItem } from '@/types/home'
 import { ref } from 'vue'
 
 const guessData = ref<GuessItem[]>([])
