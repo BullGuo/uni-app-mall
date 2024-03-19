@@ -20,3 +20,10 @@ export interface GoodsItem {
   discount: number
   orderNum: number
 }
+
+export interface BaseProfile {
+  id: number
+  avatar: string
+  account: string
+  nickname?: string
+}
