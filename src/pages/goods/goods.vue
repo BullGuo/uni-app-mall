@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import type {
+  SkuPopupEvent,
+  SkuPopupInstance,
+  SkuPopupLocaldata,
+} from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
+import { addCart } from '@/services/cart'
 import { getGoods } from '@/services/goods'
 import type { GoodsResult } from '@/types/goods'
 import { onLoad } from '@dcloudio/uni-app'
+import { computed } from 'vue'
 import { ref } from 'vue'
 
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -9,16 +16,36 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
 const props = defineProps<{ id: string }>()
 
 const goodsData = ref<GoodsResult>()
+const localData = ref({} as SkuPopupLocaldata)
 async function getGoodsData() {
-  const res = await getGoods(props.id)
-  goodsData.value = res.result
+  const { result } = await getGoods(props.id)
+  goodsData.value = result
+  localData.value = {
+    _id: result.id,
+    name: result.name,
+    goods_thumb: result.mainPictures[0],
+    spec_list: result.specs.map((v) => {
+      return { name: v.name, list: v.values }
+    }),
+    sku_list: result.skus.map((v) => {
+      return {
+        _id: v.id,
+        goods_id: result.id,
+        goods_name: result.name,
+        image: v.picture,
+        price: v.price * 100,
+        stock: v.inventory,
+        sku_name_arr: v.specs.map((vv) => vv.valueName),
+      }
+    }),
+  }
 }
 
 onLoad(() => {
   getGoodsData()
 })
 
-const activeIndex = ref(0)
+const activeIndex = ref(1)
 const handleChange: UniHelper.SwiperOnChange = (e) => {
   activeIndex.value = e.detail.current + 1
 }
@@ -29,9 +56,51 @@ function handleSwiperClick(url: string) {
     current: url,
   })
 }
+
+enum SkuMode {
+  Both = 1,
+  Cart,
+  Buy,
+}
+
+const isShowSku = ref(false)
+const skuMode = ref<SkuMode>(SkuMode.Both)
+const skuPopupRef = ref<SkuPopupInstance>()
+
+function openSkuPopup(val: SkuMode) {
+  isShowSku.value = true
+  skuMode.value = val
+}
+
+const selectText = computed(() => {
+  return skuPopupRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
+})
+
+async function handleCartAdd(e: SkuPopupEvent) {
+  await addCart({ skuId: e._id, count: e.buy_num })
+  uni.showToast({
+    title: '添加成功',
+    icon: 'success',
+  })
+  isShowSku.value = false
+}
 </script>
 
 <template>
+  <vk-data-goods-sku-popup
+    v-model="isShowSku"
+    :localdata="localData"
+    :mode="skuMode"
+    buy-now-background-color="#27BA9B"
+    add-cart-background-color="#FFA868"
+    :actived-style="{
+      color: '#27BA9B',
+      borderColor: '#27BA9B',
+      backgroundColor: '#E9F8F5',
+    }"
+    ref="skuPopupRef"
+    @add-cart="handleCartAdd"
+  />
   <scroll-view scroll-y class="viewport">
     <view class="goods">
       <view class="preview">
@@ -44,24 +113,24 @@ function handleSwiperClick(url: string) {
             <image mode="aspectFill" :src="item" />
           </swiper-item>
         </swiper>
-        <view class="indicator">
+        <view class="indicator" v-if="goodsData?.mainPictures">
           <text class="current">{{ activeIndex }}</text>
           <text class="split">/</text>
-          <text class="total">{{ goodsData?.mainPictures.length }}</text>
+          <text class="total">{{ goodsData.mainPictures.length }}</text>
         </view>
       </view>
       <view class="meta">
         <view class="price">
           <text class="symbol">¥</text>
-          <text class="number">29.90</text>
+          <text class="number">{{ goodsData?.price }}</text>
         </view>
         <view class="name ellipsis">{{ goodsData?.name }}</view>
         <view class="desc">{{ goodsData?.desc }}</view>
       </view>
       <view class="action">
-        <view class="item arrow">
+        <view class="item arrow" @tap="openSkuPopup(1)">
           <text class="label">选择</text>
-          <text class="text ellipsis"> 请选择商品规格 </text>
+          <text class="text ellipsis"> {{ selectText }} </text>
         </view>
         <view class="item arrow">
           <text class="label">送至</text>
@@ -73,7 +142,6 @@ function handleSwiperClick(url: string) {
         </view>
       </view>
     </view>
-
     <view class="detail panel">
       <view class="title">
         <text>详情</text>
@@ -93,7 +161,6 @@ function handleSwiperClick(url: string) {
         />
       </view>
     </view>
-
     <view class="similar panel">
       <view class="title">
         <text>同类推荐</text>
@@ -128,8 +195,8 @@ function handleSwiperClick(url: string) {
       </navigator>
     </view>
     <view class="buttons">
-      <view class="addcart"> 加入购物车 </view>
-      <view class="buynow"> 立即购买 </view>
+      <view class="addcart" @tap="openSkuPopup(2)"> 加入购物车 </view>
+      <view class="buynow" @tap="openSkuPopup(3)"> 立即购买 </view>
     </view>
   </view>
 </template>
