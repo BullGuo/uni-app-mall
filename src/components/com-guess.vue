@@ -6,7 +6,7 @@ import { ref } from 'vue'
 
 const guessData = ref<GuessItem[]>([])
 const pagePar: pageParams = {
-  page: 30,
+  page: 1,
   pageSize: 10,
 }
 let isFinish = ref(false)
