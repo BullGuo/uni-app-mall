@@ -17,8 +17,7 @@ async function handleLogin() {
   const res = await testLogin('13612345678')
   const { setProfile } = useMemberStore()
   setProfile(res.result)
-  uni.switchTab({
-    url: '/pages/mine/mine',
+  uni.navigateBack({
     success: () => {
       uni.showToast({ icon: 'success', title: '登录成功' })
     },
