@@ -1,4 +1,4 @@
-export interface pageParams {
+export interface PageParams {
   page: number
   pageSize: number
 }
