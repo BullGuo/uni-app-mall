@@ -82,9 +82,7 @@ function handlePayment() {
   if (!selectCartNum.value) {
     return uni.showToast({ title: '请选择商品', icon: 'none' })
   }
-  return uni.showToast({
-    title: '开发中...',
-  })
+  uni.navigateTo({ url: '/pagesOrder/create/create' })
 }
 
 const guessRef = ref<ComGuessInstance | null>(null)
